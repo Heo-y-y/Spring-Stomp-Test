@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+<h2>WebSocket 연결 테스트</h2>
+<div>
+    <input type="text" id="message" placeholder="메시지를 입력하세요" />
+    <button onclick="sendMessage()">메시지 전송</button>
+</div>
+<div id="response"></div>
+
+<script>
+    let stompClient = null;
+
+    function connect() {
+        const socket = new WebSocket('ws://localhost:8080/ws'); // 표준 WebSocket 연결로 수정
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+            stompClient.subscribe('/topic/messages', function (message) {
+                document.getElementById("response").innerText = message.body;
+            });
+        });
+    }
+
+    function sendMessage() {
+        const message = document.getElementById("message").value;
+        stompClient.send("/app/message", {}, message); // 서버로 메시지 전송
+    }
+
+    connect(); // 페이지 로드 시 WebSocket 연결 시도
+</script>
+</body>
+</html>
